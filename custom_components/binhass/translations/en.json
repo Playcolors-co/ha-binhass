@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Waltham Forest Bin Collection",
+        "description": "Enter your postcode to find your address.",
+        "data": {
+          "postcode": "Postcode"
+        }
+      },
+      "address": {
+        "title": "Select your address",
+        "data": {
+          "uprn": "Address"
+        }
+      }
+    },
+    "error": {
+      "invalid_postcode": "That does not look like a valid UK postcode.",
+      "no_addresses": "No addresses were found for that postcode.",
+      "cannot_connect": "Could not reach the Waltham Forest portal. Try again shortly.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This address is already set up."
+    }
+  }
+}
