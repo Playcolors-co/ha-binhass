@@ -19,8 +19,20 @@ collection date** (a `date` sensor):
 | `sensor.food_waste` | Food waste |
 | `sensor.garden_waste` | Garden waste |
 
-Each sensor also exposes attributes: `days_until`, `round_schedule`, and the raw
-`service_name`. Only the services your address actually has are created.
+Each sensor also exposes attributes: `days_until`, `round_schedule`, the raw
+`service_name`, and `upcoming` (a short list of projected future dates). Only the
+services your address actually has are created.
+
+### Calendar
+
+A **calendar entity** (`calendar.collections`) shows upcoming collections in the
+Home Assistant calendar, so you get a month-ahead view. Each collection is an
+all-day event named after the service.
+
+> ⚠️ **Only the next date per service is authoritative** (fetched from the
+> council). Later dates — in `upcoming` and in the calendar — are *projected*
+> from the round frequency (weekly / fortnightly) and do **not** account for
+> bank-holiday shifts, when the council moves collections.
 
 ## Installation (HACS)
 

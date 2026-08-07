@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.core import HomeAssistant, callback
@@ -12,9 +12,12 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
 from . import BinHassConfigEntry
-from .api import Collection
+from .api import Collection, project_upcoming
 from .const import CONF_ADDRESS, CONF_UPRN, DOMAIN
 from .coordinator import BinHassCoordinator
+
+# How many upcoming (projected) dates to expose as an attribute.
+UPCOMING_COUNT = 6
 
 
 async def async_setup_entry(
@@ -82,9 +85,16 @@ class BinCollectionSensor(CoordinatorEntity[BinHassCoordinator], SensorEntity):
         collection = self._collection
         if collection is None:
             return {}
-        days_until = (collection.collection_date - dt_util.now().date()).days
+        today = dt_util.now().date()
+        days_until = (collection.collection_date - today).days
+        # Project a handful of future dates. Only the first is authoritative;
+        # the rest are computed from the round frequency (see project_upcoming).
+        horizon = today + timedelta(days=90)
+        upcoming = project_upcoming(collection, horizon, max_count=UPCOMING_COUNT)
         return {
             "service_name": collection.service_name,
             "round_schedule": collection.round_schedule,
             "days_until": days_until,
+            "upcoming": [d.isoformat() for d in upcoming],
+            "upcoming_estimated": len(upcoming) > 1,
         }

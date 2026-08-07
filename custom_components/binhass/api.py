@@ -15,7 +15,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from urllib.parse import quote
 
 import aiohttp
@@ -128,6 +128,38 @@ def parse_collection_date(raw: str, today: date) -> date | None:
         if best is None or abs(delta) < abs((best - today).days):
             best = candidate
     return best
+
+
+def schedule_interval_days(round_schedule: str) -> int:
+    """Best-effort collection frequency in days from the RoundSchedule string.
+
+    The portal encodes cadence in the round name, e.g. ``dwFriFort1`` (fortnightly
+    Friday) vs ``fwFri`` (weekly Friday). Monthly rounds ('...Month...') are
+    approximated at 28 days. Anything unrecognised is treated as weekly.
+    """
+    s = round_schedule.lower()
+    if "fort" in s:
+        return 14
+    if "month" in s:
+        return 28
+    return 7
+
+
+def project_upcoming(
+    collection: "Collection", until: date, max_count: int = 26
+) -> list[date]:
+    """Project collection dates from the next confirmed one up to ``until``.
+
+    NOTE: only the first date is authoritative (fetched). The rest are computed
+    from the round frequency and do NOT account for bank-holiday shifts.
+    """
+    interval = timedelta(days=schedule_interval_days(collection.round_schedule))
+    out: list[date] = []
+    current = collection.collection_date
+    while current <= until and len(out) < max_count:
+        out.append(current)
+        current = current + interval
+    return out
 
 
 class WalthamForestClient:
