@@ -1,7 +1,27 @@
-# Waltham Forest Bin Collection
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Playcolors-co/ha-binhass/main/custom_components/binhass/brand/icon.png" alt="Waltham Forest Bin Collection" width="120" />
+</p>
 
-A Home Assistant custom integration that shows your **London Borough of Waltham
-Forest** bin collection dates as sensors, so you can automate reminders.
+<h1 align="center">Waltham Forest Bin Collection</h1>
+
+<p align="center">
+  Home Assistant integration for <b>London Borough of Waltham Forest</b> bin
+  collection dates — sensors, a calendar, and easy reminders.
+</p>
+
+<p align="center">
+  <a href="https://github.com/hacs/integration"><img src="https://img.shields.io/badge/HACS-Custom-41BDF5.svg?logo=homeassistantcommunitystore&logoColor=white" alt="HACS Custom"></a>
+  <a href="https://github.com/Playcolors-co/ha-binhass/releases"><img src="https://img.shields.io/github/v/release/Playcolors-co/ha-binhass?include_prereleases&logo=github" alt="Release"></a>
+  <a href="https://github.com/Playcolors-co/ha-binhass/actions/workflows/validate.yml"><img src="https://github.com/Playcolors-co/ha-binhass/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
+  <img src="https://img.shields.io/badge/Home%20Assistant-2024.12%2B-41BDF5?logo=home-assistant&logoColor=white" alt="Home Assistant">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/Playcolors-co/ha-binhass" alt="License"></a>
+  <a href="https://github.com/Playcolors-co/ha-binhass/stargazers"><img src="https://img.shields.io/github/stars/Playcolors-co/ha-binhass?style=flat" alt="Stars"></a>
+</p>
+
+<p align="center">
+  <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=Playcolors-co&repository=ha-binhass&category=integration"><img src="https://my.home-assistant.io/badges/hacs_repository.svg" alt="Open in HACS"></a>
+  <a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=binhass"><img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Add integration"></a>
+</p>
 
 > Unofficial, community-built, and free. Not affiliated with or endorsed by the
 > London Borough of Waltham Forest. It reads the same public "Find My Bin
