@@ -112,9 +112,9 @@ credentials, no scraping browser, no Selenium.
 
 ```mermaid
 flowchart LR
-    P["📮 Postcode"] -->|address lookup| A["🏠 Address list"]
-    A -->|you pick one| U["🔑 UPRN"]
-    U -->|collections lookup<br/>(Whitespace)| D["🗓️ Next date per service"]
+    P["📮 Postcode"] -->|"address lookup"| A["🏠 Address list"]
+    A -->|"pick address"| U["🔑 UPRN"]
+    U -->|"collections lookup · Whitespace"| D["🗓️ Next date per service"]
     D --> S["🧩 Sensors"]
     D --> C["📅 Calendar"]
 ```
