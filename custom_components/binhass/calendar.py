@@ -1,9 +1,4 @@
-"""Calendar platform for BinHass: upcoming collections as calendar events.
-
-Gives a month-ahead view in the Home Assistant calendar. Only the next date per
-service is authoritative (fetched from the council); later events are projected
-from the round frequency and may not reflect bank-holiday shifts.
-"""
+"""Calendar platform: upcoming collections as calendar events."""
 
 from __future__ import annotations
 
@@ -17,11 +12,10 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
 from . import BinHassConfigEntry
-from .api import project_upcoming
-from .const import CONF_ADDRESS, CONF_UPRN, DOMAIN
+from .const import CONF_ADDRESS_ID, CONF_COUNCIL, DOMAIN
 from .coordinator import BinHassCoordinator
+from .providers import upcoming_dates
 
-# Upper bound for how far ahead we ever project (safety cap).
 _MAX_HORIZON = timedelta(days=365)
 
 
@@ -30,56 +24,46 @@ async def async_setup_entry(
     entry: BinHassConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up a single collections calendar for this address."""
     async_add_entities([BinHassCalendar(entry.runtime_data, entry)])
 
 
 class BinHassCalendar(CoordinatorEntity[BinHassCoordinator], CalendarEntity):
-    """A calendar of upcoming bin collections for one address."""
-
     _attr_has_entity_name = True
     _attr_name = "Collections"
     _attr_icon = "mdi:calendar-check"
 
-    def __init__(
-        self, coordinator: BinHassCoordinator, entry: BinHassConfigEntry
-    ) -> None:
+    def __init__(self, coordinator, entry: BinHassConfigEntry) -> None:
         super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.data[CONF_UPRN]}_calendar"
+        uid = entry.unique_id or f"{entry.data[CONF_COUNCIL]}:{entry.data[CONF_ADDRESS_ID]}"
+        self._attr_unique_id = f"{uid}_calendar"
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.data[CONF_UPRN])},
-            name=f"Bins — {entry.data.get(CONF_ADDRESS, entry.data[CONF_UPRN])}",
-            manufacturer="Waltham Forest",
-            model="Bin Collection",
+            identifiers={(DOMAIN, uid)},
+            name=entry.title,
+            manufacturer="BinHass",
+            model="UK Bin Collection",
         )
 
-    def _build_events(self, start: date, end: date) -> list[CalendarEvent]:
+    def _events(self, start: date, end: date) -> list[CalendarEvent]:
         events: list[CalendarEvent] = []
-        for collection in self.coordinator.data or []:
-            for day in project_upcoming(collection, end):
+        for c in self.coordinator.data or []:
+            for day in upcoming_dates(c, end):
                 if day < start:
                     continue
                 events.append(
-                    CalendarEvent(
-                        summary=collection.name,
-                        start=day,
-                        end=day + timedelta(days=1),  # all-day, end exclusive
-                    )
+                    CalendarEvent(summary=c.name, start=day, end=day + timedelta(days=1))
                 )
-        events.sort(key=lambda event: (event.start, event.summary))
+        events.sort(key=lambda e: (e.start, e.summary))
         return events
 
     @property
     def event(self) -> CalendarEvent | None:
-        """Return the next upcoming collection event."""
         today = dt_util.now().date()
-        events = self._build_events(today, today + _MAX_HORIZON)
+        events = self._events(today, today + _MAX_HORIZON)
         return events[0] if events else None
 
     async def async_get_events(
         self, hass: HomeAssistant, start_date: datetime, end_date: datetime
     ) -> list[CalendarEvent]:
-        """Return collection events within the requested window."""
         today = dt_util.now().date()
         end = min(end_date.date(), today + _MAX_HORIZON)
-        return self._build_events(start_date.date(), end)
+        return self._events(start_date.date(), end)
