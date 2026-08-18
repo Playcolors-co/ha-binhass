@@ -48,6 +48,18 @@ COUNCILS: dict[str, dict] = {
         "search_hint": "address",
         "params": {"area": "EastAyrshireUK", "service": "50014"},
     },
+    "redcar_cleveland": {
+        "name": "Redcar & Cleveland",
+        "provider": "recollect",
+        "search_hint": "address",
+        "params": {"area": "RedcarandClevelandUK", "service": "50006"},
+    },
+    "middlesbrough": {
+        "name": "Middlesbrough",
+        "provider": "recollect",
+        "search_hint": "address",
+        "params": {"area": "MiddlesbroughUK", "service": "50005"},
+    },
 }
 
 

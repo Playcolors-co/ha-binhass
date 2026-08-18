@@ -39,6 +39,8 @@ yours (or send a PR to `councils.py`) via [Issues](https://github.com/Playcolors
 |---|---|---|
 | Waltham Forest | AchieveForms | next date + estimated future |
 | Newcastle upon Tyne | Recollect | real calendar |
+| Redcar & Cleveland | Recollect | real calendar |
+| Middlesbrough | Recollect | real calendar |
 | Bassetlaw | Recollect | real calendar |
 | Caerphilly County Borough | Recollect | real calendar |
 | East Ayrshire | Recollect | real calendar |
