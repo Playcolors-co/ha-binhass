@@ -5,6 +5,8 @@
 <p align="center">
   A <b>lightweight</b> Home Assistant integration for <b>UK bin collection dates</b> —
   many councils, one integration, pure HTTP (no Selenium, no container).
+  <br/><b>Beta.</b> Councils supported so far: Waltham Forest, Newcastle upon Tyne,
+  Redcar &amp; Cleveland, Middlesbrough, Bassetlaw, Caerphilly, East Ayrshire.
 </p>
 
 <p align="center">
