@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Playcolors-co/ha-binhass/main/assets/banner.png" alt="UK Bin Collection" width="100%" />
+  <img src="https://raw.githubusercontent.com/Playcolors-co/ha-binhass/main/assets/banner-beta.png" alt="UK Bin Collection (beta)" width="100%" />
 </p>
 
 <p align="center">
