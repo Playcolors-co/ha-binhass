@@ -1,12 +1,10 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Playcolors-co/ha-binhass/main/assets/banner-beta.png" alt="UK Bin Collection (beta)" width="100%" />
+  <img src="https://raw.githubusercontent.com/Playcolors-co/ha-binhass/main/assets/banner.png" alt="Waltham Forest Bin Collection" width="100%" />
 </p>
 
 <p align="center">
-  A <b>lightweight</b> Home Assistant integration for <b>UK bin collection dates</b> —
-  many councils, one integration, pure HTTP (no Selenium, no container).
-  <br/><b>Beta.</b> Councils supported so far: Waltham Forest, Newcastle upon Tyne,
-  Redcar &amp; Cleveland, Middlesbrough, Bassetlaw, Caerphilly, East Ayrshire.
+  Home Assistant integration for <b>London Borough of Waltham Forest</b> bin
+  collection dates — sensors, a calendar, and easy reminders.
 </p>
 
 <p align="center">
@@ -28,52 +26,57 @@
 </p>
 
 > [!NOTE]
-> Unofficial, community-built, and free. Not affiliated with any council. It reads
-> each council's own public "bin collection" service. Bin colours/services vary by
-> council.
-
-## 🇬🇧 Supported councils
-
-Pick your council in the setup dialog. The catalog grows every release — request
-yours (or send a PR to `councils.py`) via [Issues](https://github.com/Playcolors-co/ha-binhass/issues).
-
-| Council | Backend | Data |
-|---|---|---|
-| Waltham Forest | AchieveForms | next date + estimated future |
-| Newcastle upon Tyne | Recollect | real calendar |
-| Redcar & Cleveland | Recollect | real calendar |
-| Middlesbrough | Recollect | real calendar |
-| Bassetlaw | Recollect | real calendar |
-| Caerphilly County Borough | Recollect | real calendar |
-| East Ayrshire | Recollect | real calendar |
+> Unofficial, community-built, and free. Not affiliated with or endorsed by the
+> London Borough of Waltham Forest. It reads the same public "Find My Bin
+> Collection Dates" service the council website uses.
 
 ## ♻️ What you get
 
-A device per address with one `date` sensor per service (Refuse / Recycling /
-Food / Garden / …), each holding the **next collection date**, plus a **calendar**
-entity (`calendar.collections`) for a month-ahead view.
+A device per address with one sensor per service, each holding the **next
+collection date** (a `date` sensor):
 
-Sensor attributes: `days_until`, `round_schedule`, `service_name`, `upcoming`
-(next dates), and `upcoming_estimated`.
+| | Entity | Service |
+|:--:|---|---|
+| ⬛ | `sensor.refuse` | Domestic (black bin) refuse |
+| 🟩 | `sensor.recycling` | Recycling |
+| 🍎 | `sensor.food_waste` | Food waste |
+| 🟫 | `sensor.garden_waste` | Garden waste |
+
+Each sensor also exposes attributes: `days_until`, `round_schedule`, the raw
+`service_name`, and `upcoming` (a short list of projected future dates). Only the
+services your address actually has are created.
+
+### 📅 Calendar
+
+A **calendar entity** (`calendar.collections`) shows upcoming collections in the
+Home Assistant calendar, so you get a month-ahead view. Each collection is an
+all-day event named after the service.
 
 > [!WARNING]
-> Some councils' services only publish the **next** date per bin. For those, dates
-> beyond the next one (in `upcoming` and the calendar) are **estimated** from the
-> round frequency and don't account for bank-holiday shifts. Councils that expose a
-> real calendar (e.g. Recollect) get exact future dates (`upcoming_estimated: false`).
+> **Only the next date per service is authoritative** (fetched from the council).
+> Later dates — in `upcoming` and in the calendar — are *projected* from the
+> round frequency (weekly / fortnightly) and do **not** account for bank-holiday
+> shifts, when the council moves collections.
 
 ## 🚀 Installation (HACS)
 
-1. HACS → ⋮ → **Custom repositories** → add `https://github.com/Playcolors-co/ha-binhass`
-   as an **Integration** (or click **Open in HACS** above).
-2. Install **UK Bin Collection**, then restart Home Assistant.
-3. **Settings → Devices & Services → Add Integration → UK Bin Collection**.
-4. **Pick your council**, then enter your **postcode** (or start typing your
-   **address**, depending on the council) and choose your address.
+1. HACS → ⋮ → **Custom repositories**.
+2. Add `https://github.com/Playcolors-co/ha-binhass` as an **Integration**
+   (or just click **Open in HACS** above).
+3. Install **Waltham Forest Bin Collection**, then restart Home Assistant.
+4. **Settings → Devices & Services → Add Integration → Waltham Forest Bin
+   Collection** (or click **Add integration** above).
+5. Enter your **postcode**, pick your **address** from the list. Done — no UPRN
+   to look up by hand.
 
-Data refreshes every 12 hours.
+> [!TIP]
+> Data refreshes every 12 hours. The address picker does all the UPRN lookup for
+> you — you never touch a UPRN.
 
 ## 🔔 Example automation — "tomorrow's bins"
+
+Notify the evening before a collection. Adjust the entities and the notify
+service to your setup.
 
 ```yaml
 automation:
@@ -82,54 +85,50 @@ automation:
       - trigger: time
         at: "19:00:00"
     variables:
-      bins: "{{ states.sensor | selectattr('entity_id','search','^sensor\\.(refuse|recycling|food|garden)') | map(attribute='entity_id') | list }}"
+      bins:
+        - sensor.refuse
+        - sensor.recycling
+        - sensor.food_waste
+        - sensor.garden_waste
       tomorrow: "{{ (now() + timedelta(days=1)).strftime('%Y-%m-%d') }}"
       due: >-
         {{ bins | select('is_state', tomorrow)
-                | map('replace', 'sensor.', '') | map('replace', '_', ' ') | list }}
+                | map('replace', 'sensor.', '')
+                | map('replace', '_', ' ') | list }}
     condition:
       - condition: template
         value_template: "{{ due | count > 0 }}"
     action:
-      - service: notify.notify
+      - service: script.push_notification
         data:
           message: "🗑️ Tomorrow: {{ due | join(', ') }}"
 ```
 
 ## ⚙️ How it works
 
-No official nationwide API exists. Instead of driving each council's website with a
-browser, this integration talks to each council's backend **directly over HTTP**.
-A small set of **providers** covers many councils; a council is just data (endpoint
-+ ids) mapped to a provider.
+Waltham Forest has no official API. The integration replicates the public
+Firmstep/AchieveForms `apibroker/runLookup` calls over plain HTTPS — no
+credentials, no scraping browser, no Selenium.
 
 ```mermaid
 flowchart LR
-    C["🏛️ Council"] --> Q["📮 Postcode / address"]
-    Q -->|"provider search"| A["🏠 Your address"]
-    A -->|"provider fetch"| D["🗓️ Collection dates"]
+    P["📮 Postcode"] -->|"address lookup"| A["🏠 Address list"]
+    A -->|"pick address"| U["🔑 UPRN"]
+    U -->|"collections lookup · Whitespace"| D["🗓️ Next date per service"]
     D --> S["🧩 Sensors"]
-    D --> Cal["📅 Calendar"]
+    D --> C["📅 Calendar"]
 ```
 
-| Provider | Backend platform |
-|---|---|
-| `achieveforms` | Firmstep/AchieveForms `apibroker` |
-| `recollect` | Recollect (`api.eu.recollect.net`) |
-
-More providers (Whitespace, Bartec, …) and councils are added over time.
-
-## 🙏 Credits
-
-Council recipes are informed by the excellent, MIT-licensed
-[robbrad/UKBinCollectionData](https://github.com/robbrad/UKBinCollectionData).
-This project takes a deliberately lighter approach: pure async HTTP, a config flow,
-and no browser/Selenium — so it covers the HTTP-friendly councils very cheaply.
+1. `authapi/isauthenticated` → a session id.
+2. `apibroker/runLookup` (address lookup) → your address list for a postcode.
+3. `apibroker/runLookup` (collections lookup, backed by *Whitespace*) → the
+   services at your address with their next collection dates.
 
 ## 🔒 Privacy
 
-Your council choice and address id are stored only in your Home Assistant config
-entry and sent only to that council's service. Nothing is hardcoded per user.
+Your postcode and UPRN are stored only in your Home Assistant config entry and
+sent only to the council portal to fetch your dates. Nothing is hardcoded in
+this repository.
 
 ## ☕ Support
 

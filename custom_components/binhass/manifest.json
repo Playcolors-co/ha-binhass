@@ -1,6 +1,6 @@
 {
   "domain": "binhass",
-  "name": "UK Bin Collection",
+  "name": "Waltham Forest Bin Collection",
   "codeowners": [
     "@Playcolors-co"
   ],
@@ -10,5 +10,5 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/Playcolors-co/ha-binhass/issues",
   "requirements": [],
-  "version": "0.3.3b1"
+  "version": "0.2.3"
 }
